@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { cacheResults } from './../utils/slices/searchSlice';
 
 const useGetSearchSuggestion = (searchQuery) => {
   const [suggestions, setSuggestions] = useState([]);
+  const searchCache = useSelector((store) => store.search.searchResults);
+  const dispatch = useDispatch();
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (searchQuery) {
+      if (searchCache[searchQuery]) {
+        setSuggestions(searchCache[searchQuery]);
+      } else if (searchQuery) {
         getSuggestions();
       } else {
         setSuggestions([]);
@@ -17,6 +24,7 @@ const useGetSearchSuggestion = (searchQuery) => {
           `/api/complete/search?client=firefox&ds=yt&q=${searchQuery}`
         );
         const json = await data.json();
+        dispatch(cacheResults({ [searchQuery]: json[1] }));
         setSuggestions(json[1]);
       } catch (error) {
         console.log('Failed to fetch suggestions', error);
@@ -26,7 +34,7 @@ const useGetSearchSuggestion = (searchQuery) => {
     return () => {
       clearTimeout(timer);
     };
-  }, [searchQuery]);
+  }, [searchQuery, searchCache, dispatch]);
 
   return suggestions;
 };

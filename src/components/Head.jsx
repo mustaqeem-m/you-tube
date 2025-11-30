@@ -10,11 +10,32 @@ const Head = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestion, setShowSuggestion] = useState(false);
   const suggestions = useGetSearchSuggestion(searchQuery);
-
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
   const handleSuggestionClick = (suggestion) => {
-    console.log('handleSuggestionClick');
     setSearchQuery(suggestion);
     setShowSuggestion(false);
+  };
+  const handleKeys = (e) => {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+
+      activeSuggestionIndex >= 0 &&
+        setActiveSuggestionIndex((prev) => prev - 1);
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+
+      activeSuggestionIndex < suggestions.length - 1 &&
+        setActiveSuggestionIndex((prev) => prev + 1);
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+
+      if (activeSuggestionIndex >= 0) {
+        setSearchQuery(suggestions[activeSuggestionIndex]);
+        setShowSuggestion(false);
+      }
+    }
   };
 
   const handleToggleMenu = () => {
@@ -43,7 +64,8 @@ const Head = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setShowSuggestion(true)}
-            onBlur={() => setTimeout(() => setShowSuggestion(false), 100)}
+            onBlur={() => setTimeout(() => setShowSuggestion(false), 500)}
+            onKeyDown={(e) => handleKeys(e)}
           />
           <button className="border border-gray-300 px-4 py-1 rounded-r-full">
             <Search />
@@ -55,7 +77,11 @@ const Head = () => {
               {suggestions.map((suggestion, index) => (
                 <li
                   key={index}
-                  className="px-4 py-2 hover:bg-gray-100"
+                  className={`px-4 py-2  ${
+                    index === activeSuggestionIndex
+                      ? 'bg-gray-200'
+                      : 'hover:bg-gray-100'
+                  }`}
                   onClick={() => handleSuggestionClick(suggestion)}
                 >
                   {suggestion}

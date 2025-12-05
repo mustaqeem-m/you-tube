@@ -12,7 +12,7 @@ function App() {
         <Head />
         <Routes>
           <Route path="/" element={<Body />} />
-          <Route path="/watch/:vidId" element={<WatchPage />} />
+          <Route path="/watch" element={<WatchPage />} />
         </Routes>
       </Router>
     </Provider>
